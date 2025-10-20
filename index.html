@@ -353,15 +353,126 @@
 
         // Download receipt as PDF
         function downloadReceipt() {
-            alert('PDF download feature would be implemented here.\n\nThis would generate a PDF version of this receipt.');
+            if (!window.currentReceipt) {
+                alert('Receipt data not available');
+                return;
+            }
+            
+            const data = window.currentReceipt;
+            
+            // Create a printable receipt HTML
+            const receiptHTML = `
+                <html>
+                <head>
+                    <title>Receipt - ${data.orderId}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; max-width: 600px; margin: 20px auto; padding: 20px; }
+                        .header { text-align: center; border-bottom: 2px solid #333; padding-bottom: 20px; margin-bottom: 20px; }
+                        .header h1 { margin: 0; font-size: 24px; }
+                        .info { background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+                        .info-row { margin: 8px 0; }
+                        .info-label { font-weight: bold; display: inline-block; width: 120px; }
+                        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                        th { background: #f5f5f5; padding: 10px; text-align: left; border-bottom: 2px solid #333; }
+                        td { padding: 10px; border-bottom: 1px solid #ddd; }
+                        .totals { margin-top: 20px; text-align: right; }
+                        .total-row { margin: 8px 0; }
+                        .grand-total { font-size: 18px; font-weight: bold; border-top: 2px solid #333; padding-top: 10px; margin-top: 10px; }
+                        .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>${data.restaurant.name}</h1>
+                        <p>${data.restaurant.address}<br>${data.restaurant.phone}</p>
+                    </div>
+                    
+                    <div class="info">
+                        <div class="info-row"><span class="info-label">Order #:</span> ${data.orderId}</div>
+                        <div class="info-row"><span class="info-label">Date:</span> ${data.date}</div>
+                        <div class="info-row"><span class="info-label">Customer:</span> ${data.customer}</div>
+                        <div class="info-row"><span class="info-label">Phone:</span> ${data.phone}</div>
+                    </div>
+                    
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th style="text-align: center;">Qty</th>
+                                <th style="text-align: right;">Price</th>
+                                <th style="text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.items.map(item => `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td style="text-align: center;">${item.quantity}</td>
+                                    <td style="text-align: right;">${item.unitPrice.toFixed(2)}</td>
+                                    <td style="text-align: right;">${item.total.toFixed(2)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                    
+                    <div class="totals">
+                        <div class="total-row">Subtotal: ${data.subtotal.toFixed(2)}</div>
+                        <div class="total-row">Tax: ${data.tax.toFixed(2)}</div>
+                        <div class="total-row grand-total">Total: ${data.total.toFixed(2)}</div>
+                    </div>
+                    
+                    <div class="footer">
+                        <p>Thank you for your business!</p>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            // Create a new window and print
+            const printWindow = window.open('', '', 'height=800,width=600');
+            printWindow.document.write(receiptHTML);
+            printWindow.document.close();
+            printWindow.focus();
+            
+            // Wait for content to load, then trigger print
+            setTimeout(() => {
+                printWindow.print();
+            }, 250);
         }
 
         // Email receipt
         function emailReceipt() {
-            const email = prompt('Enter your email address:');
-            if (email) {
-                alert(`Receipt would be sent to: ${email}\n\nThis feature would be connected to your backend email service.`);
+            if (!window.currentReceipt) {
+                alert('Receipt data not available');
+                return;
             }
+            
+            const data = window.currentReceipt;
+            
+            // Create email body
+            const subject = `Receipt #${data.orderId} - ${data.restaurant.name}`;
+            const body = `
+Receipt Details:
+-----------------
+Order #: ${data.orderId}
+Date: ${data.date}
+Customer: ${data.customer}
+
+Items:
+${data.items.map(item => `- ${item.name} (${item.quantity}x) - ${item.total.toFixed(2)}`).join('\n')}
+
+Subtotal: ${data.subtotal.toFixed(2)}
+Tax: ${data.tax.toFixed(2)}
+Total: ${data.total.toFixed(2)}
+
+Thank you for dining at ${data.restaurant.name}!
+${data.restaurant.address}
+${data.restaurant.phone}
+            `.trim();
+            
+            // Open email client with pre-filled content
+            const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailtoLink;
         }
     </script>
 </body>
