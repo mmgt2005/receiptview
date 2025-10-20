@@ -1,0 +1,4 @@
+const urlParams = new URLSearchParams(window.location.search);
+const base64Data = urlParams.get('data');
+const jsonString = atob(base64Data);
+const receiptData = JSON.parse(jsonString);
