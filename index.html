@@ -200,7 +200,7 @@
     <div class="container">
         <div class="header">
             <h1>🧾 Digital Receipt</h1>
-            <p>Happy Restaurant</p>
+            <p id="restaurantName">Happy Restaurant</p>
         </div>
         
         <div id="loading" class="loading">
@@ -267,7 +267,7 @@
         
         <div class="footer">
             <p>Thank you for dining with us! 🍽️</p>
-            <p style="margin-top: 5px; font-size: 12px;">
+            <p style="margin-top: 5px; font-size: 12px;" id="restaurantFooter">
                 9523 Fairdale Avenue, Jonesboro GA 30236<br>
                 678-571-4137
             </p>
@@ -313,6 +313,14 @@
             document.getElementById('loading').style.display = 'none';
             document.getElementById('receiptContent').style.display = 'block';
             
+            // Update restaurant info in header and footer
+            if (data.restaurant) {
+                document.getElementById('restaurantName').textContent = data.restaurant.name;
+                
+                const footerText = `${data.restaurant.address}<br>${data.restaurant.phone}`;
+                document.getElementById('restaurantFooter').innerHTML = footerText;
+            }
+            
             // Fill in basic info
             document.getElementById('orderId').textContent = data.orderId;
             document.getElementById('orderDate').textContent = data.date;
@@ -327,17 +335,17 @@
                 itemDiv.innerHTML = `
                     <div class="item-details">
                         <div class="item-name">${item.name}</div>
-                        <div class="item-meta">Quantity: ${item.quantity} × $${item.unitPrice.toFixed(2)}</div>
+                        <div class="item-meta">Quantity: ${item.quantity} × ${item.unitPrice.toFixed(2)}</div>
                     </div>
-                    <div class="item-price">$${item.total.toFixed(2)}</div>
+                    <div class="item-price">${item.total.toFixed(2)}</div>
                 `;
                 itemsList.appendChild(itemDiv);
             });
             
             // Display totals
-            document.getElementById('subtotal').textContent = `$${data.subtotal.toFixed(2)}`;
-            document.getElementById('tax').textContent = `$${data.tax.toFixed(2)}`;
-            document.getElementById('total').textContent = `$${data.total.toFixed(2)}`;
+            document.getElementById('subtotal').textContent = `${data.subtotal.toFixed(2)}`;
+            document.getElementById('tax').textContent = `${data.tax.toFixed(2)}`;
+            document.getElementById('total').textContent = `${data.total.toFixed(2)}`;
             
             // Store data for later use
             window.currentReceipt = data;
